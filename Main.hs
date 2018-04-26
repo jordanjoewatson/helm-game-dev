@@ -197,10 +197,6 @@ moveMap :: [Form SDLEngine] -> Double -> Double -> [Form SDLEngine]
 moveMap [] x y = []
 moveMap (t:tiles) x y = [move (V2 (-x) (-y)) $ t] ++ moveMap tiles x y
 
-reduce :: [[Form SDLEngine]] -> [Form SDLEngine]
-reduce [] = []
-reduce (l:ls) = l ++ reduce ls
-
 background :: Double -> Double -> [Form SDLEngine]
 background x y = b
   where
