@@ -1,7 +1,7 @@
 # helm-game-dev
 Experimenting in Haskell using Helm to create games
 
-Currently takes a map of the form
+Currently allows the background to move based on keystrokes and takes a map of the form
 
 ```
 [ "111000011"
