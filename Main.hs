@@ -47,6 +47,7 @@ data Model = Model
   , left :: Bool
   , up :: Bool
   , down :: Bool
+  , direction :: [Char]
   }
 
 square_size = 32
@@ -59,6 +60,7 @@ initial =
     , left = False
     , up = False
     , down = False
+    , direction = "x"
     }, Cmd.none)
 
 -- If nothing/Idle, do nothing
@@ -111,38 +113,50 @@ update model@Model { .. } (Animate dt)
   | right && up =
     (model
       { player_pos = V2 (x + 2) (y - 2)
+      , direction = "e"
       }, Cmd.none)
   | right && down =
     (model
       { player_pos = V2 (x + 2) (y + 2)
+      , direction = "c"
       }, Cmd.none)
   | right =
     (model
       { player_pos = V2 (x + 2) y
+      , direction = "d"
       }, Cmd.none)
   | left && up =
     (model
       { player_pos = V2 (x - 2) (y - 2)
+      , direction = "q"
       }, Cmd.none)
   | left && down =
     (model
       { player_pos = V2 (x - 2) (y + 2)
+      , direction = "z"
       }, Cmd.none)
   | left =
     (model
       { player_pos = V2 (x - 2) y
+      , direction = "a"
       }, Cmd.none)
   | up =
     (model
       { player_pos = V2 x (y - 2)
+      , direction = "w"
       }, Cmd.none)
   | down =
     (model
       { player_pos = V2 x (y + 2)
+      , direction = "x"
       }, Cmd.none)
-  | otherwise = (model, Cmd.none)
+  | otherwise =
+    (model
+      { direction = "x"
+      }, Cmd.none)
     where
       V2 x y = player_pos
+
 
 update model@Model { .. } AllStop =
   (model
@@ -174,10 +188,11 @@ view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
     ( background imgs x y
-    ++ [ player
+    ++ [ player imgs c
        ])
     where
       V2 x y = player_pos
+      c = direction -- if up then 1, right is 2, down is 3, left is 4, right up is 5...
 
 
 main :: IO ()
