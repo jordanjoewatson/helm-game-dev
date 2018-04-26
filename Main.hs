@@ -1,5 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
+
+import Graphics
+import Image
+
+import System.Directory
+
 import Prelude hiding (Right, Left)
 import Linear.V2 (V2(V2))
 
@@ -163,67 +169,34 @@ subscriptions = Sub.batch
   , Time.fps 60 Animate
   ]
 
-grid_map = [ "1111100000011111"
-           , "1111100000011111"
-           , "1111100000011111"
-           , "1111100000011111"
-           , "1000000000000001"
-           , "1000000000000001"
-           , "1000000000000001"
-           , "1000000000000001"
-           , "1111111110011111"
-           , "1122222222222211"
-           , "1122222222222211" ]
-
-convertToSprites :: [Char] -> [Form SDLEngine]
-convertToSprites [] = []
-convertToSprites (c:cs)
-  | c == '0' = [filled (rgb 0.4 1 0.43) $ square 32] ++ convertToSprites cs
-  | c == '1' = [filled (rgb 0.65 0.5 0.2) $ square 32] ++ convertToSprites cs
-  | c == '2' = [filled (rgb 0 0 0.6) $ square 32] ++ convertToSprites cs
-  | otherwise = [filled (rgb 1 0.5 0.8) $ square 32] ++ convertToSprites cs
-
-spreadTiles :: [Int] -> [Form SDLEngine] -> [Form SDLEngine]
-spreadTiles [] [] = []
-spreadTiles (n:ns) (tile:ts) = [(move (V2 (fromIntegral n) 0) $ tile)] ++ spreadTiles ns ts
-
-spreadRows :: Int -> [Form SDLEngine] -> [Form SDLEngine]
-spreadRows n [] = []
-spreadRows n (t:ts) = [move (V2 0 (n'*32)) $ t] ++ spreadRows n ts
-  where
-    n' = fromIntegral n
-
-moveMap :: [Form SDLEngine] -> Double -> Double -> [Form SDLEngine]
-moveMap [] x y = []
-moveMap (t:tiles) x y = [move (V2 (-x) (-y)) $ t] ++ moveMap tiles x y
-
-background :: Double -> Double -> [Form SDLEngine]
-background x y = b
-  where
-    rows = [ (convertToSprites row) | row <- grid_map ]
-    xs = [ spreadTiles (map (\n -> 32 * n) [ 1 .. length row ]) row | row <- rows ]
-    b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
-
--- paint player
-player :: Form SDLEngine
-player = (move (V2 160 (50)) $ filled (rgb 1 1 1) $ square 32)
-
-view :: Model -> Graphics SDLEngine
-view model@Model { .. } = Graphics2D $
+-- can pass in current direction into player function to print correct direction
+view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
+view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
-    ( background x y
+    ( background imgs x y
     ++ [ player
        ])
     where
       V2 x y = player_pos
 
+
 main :: IO ()
 main = do
   engine <- SDL.startup
-  run engine GameConfig
-    {
-      initialFn       = initial,
-      updateFn        = update,
-      subscriptionsFn = subscriptions,
-      viewFn          = view
-    }
+
+  let imgs = imagePaths
+      loadAssets' [] game loaded = game loaded
+      loadAssets' ((f,id):fs) game loaded = do
+        SDL.withImage engine f $ \image ->
+          loadAssets' fs game (M.insert id image loaded)
+      loadAssets files game = loadAssets' files game M.empty
+
+  loadAssets imgs $ \allAssets ->
+    run engine GameConfig
+      { initialFn       = initial
+      , updateFn        = update
+      , subscriptionsFn = subscriptions
+      , viewFn          = view allAssets
+      }
+
+-- run engine GameConfig

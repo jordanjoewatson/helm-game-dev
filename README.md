@@ -1,7 +1,7 @@
 # helm-game-dev
 Experimenting in Haskell using Helm to create games
 
-Currently allows the background to move based on keystrokes and takes a map of the form
+Currently allows the background to move based on keystrokes and makes a tilemap from a [Char] array
 
 ```
 [ "111000011"
@@ -9,5 +9,8 @@ Currently allows the background to move based on keystrokes and takes a map of t
 , "110000001"
 , "222222222" ]
 ```
-
-and converts it to a tilemap
+ 
+Sprites are taken from here
+```
+https://opengameart.org/content/2d-lost-garden-tileset-transition-to-jetrels-wood-tileset
+```
