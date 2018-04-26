@@ -27,19 +27,8 @@ grid_map = [ "0000045555600000"
 
 convertToSprites :: M.Map String (Image SDLEngine) -> [Char] -> [Form SDLEngine]
 convertToSprites tiles [] = []
-convertToSprites tiles (c:cs)
-  | c == '0' = [image (V2 32 32) (tiles M.! "0")] ++ convertToSprites tiles cs
-  | c == '1' = [image (V2 32 32) (tiles M.! "1")] ++ convertToSprites tiles cs
-  | c == '2' = [image (V2 32 32) (tiles M.! "2")] ++ convertToSprites tiles cs
-  | c == '3' = [image (V2 32 32) (tiles M.! "3")] ++ convertToSprites tiles cs
-  | c == '4' = [image (V2 32 32) (tiles M.! "4")] ++ convertToSprites tiles cs
-  | c == '5' = [image (V2 32 32) (tiles M.! "5")] ++ convertToSprites tiles cs
-  | c == '6' = [image (V2 32 32) (tiles M.! "6")] ++ convertToSprites tiles cs
-  | c == '7' = [image (V2 32 32) (tiles M.! "7")] ++ convertToSprites tiles cs
-  | c == '8' = [image (V2 32 32) (tiles M.! "8")] ++ convertToSprites tiles cs
-  | otherwise = [image (V2 32 32) (tiles M.! "5")] ++ convertToSprites tiles cs
-
-
+convertToSprites tiles (c:cs) = [image (V2 32 32) (tiles M.! [c])] ++ convertToSprites tiles cs
+  
 
 spreadTiles :: [Int] -> [Form SDLEngine] -> [Form SDLEngine]
 spreadTiles [] [] = []
