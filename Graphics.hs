@@ -15,14 +15,12 @@ import Helm.Graphics2D
 
 import qualified Helm.Engine.SDL as SDL
 
-
 convertToSprites :: M.Map String (Image SDLEngine) -> [Char] -> [Form SDLEngine]
 convertToSprites tiles [] = []
 convertToSprites tiles (c:cs) = tile ++ convertToSprites tiles cs
   where
     tile | c == '-' = [(move (V2 32 32) $ blank)]
          | otherwise = [image (V2 32 32) (tiles M.! [c])]
-
 
 spreadTiles :: [Int] -> [Form SDLEngine] -> [Form SDLEngine]
 spreadTiles [] [] = []
@@ -38,17 +36,10 @@ moveMap :: [Form SDLEngine] -> Double -> Double -> [Form SDLEngine]
 moveMap [] x y = []
 moveMap (t:tiles) x y = [move (V2 (-x) (-y)) $ t] ++ moveMap tiles x y
 
-background :: M.Map String (Image SDLEngine) -> Double -> Double -> [Form SDLEngine]
-background tiles x y = b
+background :: [[Char]] -> M.Map String (Image SDLEngine) -> Double -> Double -> [Form SDLEngine]
+background tileMap tiles x y = b
   where
     rows = [ (convertToSprites tiles row) | row <- tileMap ]
-    xs = [ spreadTiles (map (\n -> 32 * n) [ 1 .. length row ]) row | row <- rows ]
-    b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
-
-buildings :: M.Map String (Image SDLEngine) -> Double -> Double -> [Form SDLEngine]
-buildings tiles x y = b
-  where
-    rows = [ (convertToSprites tiles row) | row <- buildingsMap ]
     xs = [ spreadTiles (map (\n -> 32 * n) [ 1 .. length row ]) row | row <- rows ]
     b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
 

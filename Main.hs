@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-
+import Maps
 import Graphics
 import Image
 
@@ -206,8 +206,8 @@ subscriptions = Sub.batch
 view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
-    (  background imgs x y
-    ++ buildings imgs x y
+    (  background tileMap imgs x y
+    ++ background buildingsMap imgs x y
     ++ [ player imgs direction fight
        ])
     where
