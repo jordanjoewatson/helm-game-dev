@@ -1,7 +1,7 @@
 # helm-game-dev
 Experimenting in Haskell using Helm to create games
 
-<img width="609" alt="screen shot 2018-04-26 at 22 33 43" src="https://user-images.githubusercontent.com/17591552/39363489-687413fa-4a22-11e8-8ad6-0aaa78e11a1c.png">
+<img width="730" alt="screen shot 2018-04-27 at 15 03 39" src="https://user-images.githubusercontent.com/17591552/39366684-86e9dc7a-4a2c-11e8-91e2-5994716ab34f.png">
 
 Currently allows the background to move based on keystrokes and makes a tilemap from a [Char] array
 
