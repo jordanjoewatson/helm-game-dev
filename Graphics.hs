@@ -12,23 +12,23 @@ import Helm.Graphics2D
 
 import qualified Helm.Engine.SDL as SDL
 
-grid_map = [ "0788888885555588890"
-           , "0000000045555600000"
-           , "0000000045555600000"
-           , "0000000045555600000"
-           , "0000000045555600000"
-           , "0000122255555522230"
-           , "0000455555555555560"
-           , "00004555@£$55555560"
-           , "00004555%^&55555560"
-           , "00004555*()55555560"
-           , "0000455555555555560"
-           , "0000455555555555560"
-           , "0000455555555555560"
-           , "0000788888885588890"
-           , "0000000000004600000"
-           , "0000000000007900000"
-           , "0000000000000000000" ]
+grid_map = [ "07888888855555888900000"
+           , "00000000455556000000000"
+           , "00000000455556000000000"
+           , "00000000455556000000000"
+           , "00000000455556000000000"
+           , "00001222555555222300000"
+           , "00004555555555555600000"
+           , "00004555@£$555555600022"
+           , "00004555%^&555555522258"
+           , "00004555*()555555588890"
+           , "00004555555555555600000"
+           , "00004555555555555600000"
+           , "00004555555555555600000"
+           , "00007888888855888900000"
+           , "00000000000046000000000"
+           , "00000000000079000000000"
+           , "00000000000000000000000" ]
 
 convertToSprites :: M.Map String (Image SDLEngine) -> [Char] -> [Form SDLEngine]
 convertToSprites tiles [] = []
@@ -57,11 +57,16 @@ background tiles x y = b
     b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
 
 -- paint player
-player :: M.Map String (Image SDLEngine) -> [Char] -> Form SDLEngine
-player imgs c = image (V2 32 32) (imgs M.! c)
---  | n == 1 = image (V2 32 40) (imgs M.! "w")
---  | n == 2 = image (V2 32 40) (imgs M.! "d")
---  | n == 3 = image (V2 32 40) (imgs M.! "s")
---  | n == 4 = image (V2 32 40) (imgs M.! "a")
---   | otherwise = image (V2 40 40) (imgs M.! "s")
--- player imgs n = (move (V2 160 (50)) $ filled (rgb 1 1 1) $ square 32)
+player :: M.Map String (Image SDLEngine) -> [Char] -> Int -> Form SDLEngine
+player imgs c f = image (V2 32 32) (imgs M.! i)
+  where
+    i | f == 0 = c
+      | f `mod` 8 == 0 = "fighter7"
+      | f `mod` 7 == 0 = "fighter6"
+      | f `mod` 6 == 0 = "fighter5"
+      | f `mod` 5 == 0 = "fighter4"
+      | f `mod` 4 == 0 = "fighter3"
+      | f `mod` 3 == 0 = "fighter2"
+      | f `mod` 2 == 0 = "fighter1"
+      | f `mod` 1 == 0  = "fighter0"
+      | otherwise = c

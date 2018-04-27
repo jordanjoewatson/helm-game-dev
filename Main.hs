@@ -39,6 +39,7 @@ data Action
   | DownStop
   | UpStop
   | AllStop
+  | Space
 
 
 data Model = Model
@@ -47,6 +48,7 @@ data Model = Model
   , left :: Bool
   , up :: Bool
   , down :: Bool
+  , fight :: Int
   , direction :: [Char]
   }
 
@@ -60,6 +62,7 @@ initial =
     , left = False
     , up = False
     , down = False
+    , fight = 0
     , direction = "x"
     }, Cmd.none)
 
@@ -107,64 +110,77 @@ update model@Model { .. } DownStop =
     { down = False
     }, Cmd.none)
 
+update model@Model { .. } Space
+  | fight == 0 =
+    (model
+      { fight = 16
+      }, Cmd.none)
+  | otherwise = (model, Cmd.none)
 
 -- Update player position based on the keys being pressed
 update model@Model { .. } (Animate dt)
   | right && up =
     (model
       { player_pos = V2 (x + 2) (y - 2)
+      , fight = fight'
       , direction = "e"
       }, Cmd.none)
   | right && down =
     (model
       { player_pos = V2 (x + 2) (y + 2)
+      , fight = fight'
       , direction = "c"
       }, Cmd.none)
   | right =
     (model
       { player_pos = V2 (x + 2) y
+      , fight = fight'
       , direction = "d"
       }, Cmd.none)
   | left && up =
     (model
       { player_pos = V2 (x - 2) (y - 2)
+      , fight = fight'
       , direction = "q"
       }, Cmd.none)
   | left && down =
     (model
       { player_pos = V2 (x - 2) (y + 2)
+      , fight = fight'
       , direction = "z"
       }, Cmd.none)
   | left =
     (model
       { player_pos = V2 (x - 2) y
+      , fight = fight'
       , direction = "a"
       }, Cmd.none)
   | up =
     (model
       { player_pos = V2 x (y - 2)
+      , fight = fight'
       , direction = "w"
       }, Cmd.none)
   | down =
     (model
       { player_pos = V2 x (y + 2)
+      , fight = fight'
       , direction = "x"
       }, Cmd.none)
   | otherwise =
     (model
       { direction = "x"
+      , fight = fight'
       }, Cmd.none)
     where
       V2 x y = player_pos
+      fight' | fight > 0 = fight - 1
+             | otherwise = 0
 
 
 update model@Model { .. } AllStop =
-  (model
-    { left = False
-    , right = False
-    , up = False
-    , down = False
-    }, Cmd.none)
+  (model, Cmd.none)
+
 
 subscriptions :: Sub SDLEngine Action
 subscriptions = Sub.batch
@@ -180,6 +196,9 @@ subscriptions = Sub.batch
     Keyboard.UpKey -> UpStop
     Keyboard.DownKey -> DownStop
     _ -> AllStop)
+  , Keyboard.presses $ \key -> (case key of
+    Keyboard.SpaceKey -> Space
+    _ -> AllStop)
   , Time.fps 60 Animate
   ]
 
@@ -188,11 +207,11 @@ view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
     ( background imgs x y
-    ++ [ player imgs c
+    ++ [ player imgs direction fight
        ])
     where
       V2 x y = player_pos
-      c = direction -- if up then 1, right is 2, down is 3, left is 4, right up is 5...
+      -- c = direction -- if up then 1, right is 2, down is 3, left is 4, right up is 5...
 
 
 main :: IO ()
