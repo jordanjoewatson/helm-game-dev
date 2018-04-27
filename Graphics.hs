@@ -1,4 +1,7 @@
 module Graphics where
+
+import Maps
+
 import Prelude hiding (Right, Left)
 import Linear.V2 (V2(V2))
 
@@ -12,27 +15,13 @@ import Helm.Graphics2D
 
 import qualified Helm.Engine.SDL as SDL
 
-grid_map = [ "07888888855555888900000"
-           , "00000000455556000000000"
-           , "00000000455556000000000"
-           , "00000000455556000000000"
-           , "00000000455556000000000"
-           , "00001222555555222300000"
-           , "00004555555555555600000"
-           , "00004555@£$555555600022"
-           , "00004555%^&555555522258"
-           , "00004555*()555555588890"
-           , "00004555555555555600000"
-           , "00004555555555555600000"
-           , "00004555555555555600000"
-           , "00007888888855888900000"
-           , "00000000000046000000000"
-           , "00000000000079000000000"
-           , "00000000000000000000000" ]
 
 convertToSprites :: M.Map String (Image SDLEngine) -> [Char] -> [Form SDLEngine]
 convertToSprites tiles [] = []
-convertToSprites tiles (c:cs) = [image (V2 32 32) (tiles M.! [c])] ++ convertToSprites tiles cs
+convertToSprites tiles (c:cs) = tile ++ convertToSprites tiles cs
+  where
+    tile | c == '-' = [(move (V2 32 32) $ blank)]
+         | otherwise = [image (V2 32 32) (tiles M.! [c])]
 
 
 spreadTiles :: [Int] -> [Form SDLEngine] -> [Form SDLEngine]
@@ -52,7 +41,14 @@ moveMap (t:tiles) x y = [move (V2 (-x) (-y)) $ t] ++ moveMap tiles x y
 background :: M.Map String (Image SDLEngine) -> Double -> Double -> [Form SDLEngine]
 background tiles x y = b
   where
-    rows = [ (convertToSprites tiles row) | row <- grid_map ]
+    rows = [ (convertToSprites tiles row) | row <- tileMap ]
+    xs = [ spreadTiles (map (\n -> 32 * n) [ 1 .. length row ]) row | row <- rows ]
+    b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
+
+buildings :: M.Map String (Image SDLEngine) -> Double -> Double -> [Form SDLEngine]
+buildings tiles x y = b
+  where
+    rows = [ (convertToSprites tiles row) | row <- buildingsMap ]
     xs = [ spreadTiles (map (\n -> 32 * n) [ 1 .. length row ]) row | row <- rows ]
     b = moveMap (concat ((zipWith (spreadRows) [ 1 .. length xs ] xs))) x y
 

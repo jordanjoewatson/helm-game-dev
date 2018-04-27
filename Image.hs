@@ -35,4 +35,8 @@ imagePaths = [ ("images/grass0.png","0")
              , ("images/fighter4.png","fighter4")
              , ("images/fighter5.png","fighter5")
              , ("images/fighter6.png","fighter6")
-             , ("images/fighter7.png","fighter7") ]
+             , ("images/fighter7.png","fighter7")
+             , ("images/h1.png","h")
+             , ("images/h2.png","j")
+             , ("images/h3.png","n")
+             , ("images/h4.png","m")   ]

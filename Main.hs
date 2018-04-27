@@ -206,12 +206,13 @@ subscriptions = Sub.batch
 view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
-    ( background imgs x y
+    (  background imgs x y
+    ++ buildings imgs x y
     ++ [ player imgs direction fight
        ])
     where
       V2 x y = player_pos
-      -- c = direction -- if up then 1, right is 2, down is 3, left is 4, right up is 5...
+
 
 
 main :: IO ()
