@@ -15,11 +15,25 @@ import Helm.Graphics2D
 
 import qualified Helm.Engine.SDL as SDL
 
+check :: Double -> Double -> Double -> Double -> V2 Double
+check x y a b
+  | x' >= length (tileMap !! 0) || x' <= 0 = V2 x y
+  | y' <= 0 || y' >= length tileMap = V2 x y
+  | buildingTile `elem` buildingTiles = V2 x y
+  | tile `elem` walkTiles = V2 (x + a) (y + b)
+  | otherwise = V2 x y
+  where
+    x' = (floor ((x + a) / 32)) -- was x+2
+    y' = (floor ((y + b) / 32))
+    tile = (tileMap !! y') !! x'
+    buildingTile = (buildingsMap !! y') !! x'
+
+
 convertToSprites :: M.Map String (Image SDLEngine) -> [Char] -> [Form SDLEngine]
 convertToSprites tiles [] = []
 convertToSprites tiles (c:cs) = tile ++ convertToSprites tiles cs
   where
-    tile | c == '-' = [(move (V2 32 32) $ blank)]
+    tile | c == '-' || c == '.' = [(move (V2 32 32) $ blank)]
          | otherwise = [image (V2 32 32) (tiles M.! [c])]
 
 spreadTiles :: [Int] -> [Form SDLEngine] -> [Form SDLEngine]

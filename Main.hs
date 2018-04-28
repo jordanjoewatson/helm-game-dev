@@ -3,6 +3,7 @@
 import Maps
 import Graphics
 import Image
+import Logic
 
 import System.Directory
 
@@ -57,7 +58,7 @@ square_size = 32
 initial :: (Model, Cmd SDLEngine Action)
 initial =
   (Model
-    { player_pos = V2 100 100
+    { player_pos = V2 32 32
     , right = False
     , left = False
     , up = False
@@ -121,49 +122,49 @@ update model@Model { .. } Space
 update model@Model { .. } (Animate dt)
   | right && up =
     (model
-      { player_pos = V2 (x + 2) (y - 2)
+      { player_pos = check x y 2 (-2)
       , fight = fight'
       , direction = "e"
       }, Cmd.none)
   | right && down =
     (model
-      { player_pos = V2 (x + 2) (y + 2)
+      { player_pos = check x y 2 2
       , fight = fight'
       , direction = "c"
       }, Cmd.none)
   | right =
     (model
-      { player_pos = V2 (x + 2) y
+      { player_pos = check x y 2 0
       , fight = fight'
       , direction = "d"
       }, Cmd.none)
   | left && up =
     (model
-      { player_pos = V2 (x - 2) (y - 2)
+      { player_pos = check x y (-2) (-2)
       , fight = fight'
       , direction = "q"
       }, Cmd.none)
   | left && down =
     (model
-      { player_pos = V2 (x - 2) (y + 2)
+      { player_pos = check x y (-2) 2
       , fight = fight'
       , direction = "z"
       }, Cmd.none)
   | left =
     (model
-      { player_pos = V2 (x - 2) y
+      { player_pos = check x y (-2) 0
       , fight = fight'
       , direction = "a"
       }, Cmd.none)
   | up =
     (model
-      { player_pos = V2 x (y - 2)
+      { player_pos = check x y 0 (-2) -- change back to y - 2
       , fight = fight'
       , direction = "w"
       }, Cmd.none)
   | down =
     (model
-      { player_pos = V2 x (y + 2)
+      { player_pos = check x y 0 2
       , fight = fight'
       , direction = "x"
       }, Cmd.none)
@@ -207,9 +208,9 @@ view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
     (  background tileMap imgs x y
-    ++ background buildingsMap imgs x y
-    ++ [ player imgs direction fight
-       ])
+    ++ [ move (V2 0 0) $ player imgs direction fight
+       ]
+    ++ background buildingsMap imgs x y)
     where
       V2 x y = player_pos
 
