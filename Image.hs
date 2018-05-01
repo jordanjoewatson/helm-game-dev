@@ -39,4 +39,9 @@ imagePaths = [ ("images/grass0.png","0")
              , ("images/h1.png","h")
              , ("images/h2.png","j")
              , ("images/h3.png","n")
-             , ("images/h4.png","m")   ]
+             , ("images/h4.png","m")
+             , ("images/tree1.png","r")
+             , ("images/tree2.png","t")
+             , ("images/tree3.png","f")
+             , ("images/tree4.png","g")
+             , ("images/houseTile.png", "=") ]

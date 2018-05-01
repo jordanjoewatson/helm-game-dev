@@ -1,6 +1,7 @@
 module Graphics where
 
 import Maps
+import Locations
 
 import Prelude hiding (Right, Left)
 import Linear.V2 (V2(V2))
@@ -13,8 +14,30 @@ import Helm.Color
 import Helm.Engine.SDL (SDLEngine)
 import Helm.Graphics2D
 
+import qualified Helm.Graphics2D.Text as Text
 import qualified Helm.Engine.SDL as SDL
 
+
+
+pausedOverlay :: Bool -> Double -> Double -> Form SDLEngine
+pausedOverlay paused x y
+  | paused =
+      text $ Text.height 30 $
+             Text.color (rgb 1 1 1) $
+             Text.toText "Game Paused"
+  | otherwise = (move (V2 32 32) $ blank)
+
+
+checkLocation :: Double -> Double -> Double -> Double -> Location
+checkLocation x y a b
+  | buildingTile == 'm' = House
+  | otherwise = World
+    where
+      x' = (floor ((x + a) / 32)) -- was x+2
+      y' = (floor ((y + b) / 32))
+      buildingTile = (buildingsMap !! y') !! x'
+
+-- need to add code to make the check function work on current working map
 check :: Double -> Double -> Double -> Double -> V2 Double
 check x y a b
   | x' >= length (tileMap !! 0) || x' <= 0 = V2 x y

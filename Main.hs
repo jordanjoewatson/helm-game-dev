@@ -4,6 +4,7 @@ import Maps
 import Graphics
 import Image
 import Logic
+import Locations
 
 import System.Directory
 
@@ -28,6 +29,9 @@ import qualified Helm.Sub as Sub
 data Tile = Grass
           | None
 
+-- data Location = World
+--               | House deriving Eq
+
 data Action
   = Idle
   | Animate Double
@@ -41,16 +45,20 @@ data Action
   | UpStop
   | AllStop
   | Space
+  | Pause
 
 
 data Model = Model
   { player_pos :: V2 Double
+  , health :: Int
   , right :: Bool
   , left :: Bool
   , up :: Bool
   , down :: Bool
   , fight :: Int
   , direction :: [Char]
+  , paused :: Bool
+  , location :: Location
   }
 
 square_size = 32
@@ -58,13 +66,16 @@ square_size = 32
 initial :: (Model, Cmd SDLEngine Action)
 initial =
   (Model
-    { player_pos = V2 32 32
+    { player_pos = V2 96 96 -- was 32 32
+    , health = 100
     , right = False
     , left = False
     , up = False
     , down = False
     , fight = 0
     , direction = "x"
+    , paused = False
+    , location = World
     }, Cmd.none)
 
 -- If nothing/Idle, do nothing
@@ -112,14 +123,24 @@ update model@Model { .. } DownStop =
     }, Cmd.none)
 
 update model@Model { .. } Space
+  | paused = (model, Cmd.none)
   | fight == 0 =
     (model
       { fight = 16
       }, Cmd.none)
   | otherwise = (model, Cmd.none)
 
+update model@Model { .. } Pause =
+  (model
+    { paused = play
+    }, Cmd.none)
+  where
+    play | paused = False
+         | otherwise = True
+
 -- Update player position based on the keys being pressed
 update model@Model { .. } (Animate dt)
+  | paused = (model, Cmd.none)
   | right && up =
     (model
       { player_pos = check x y 2 (-2)
@@ -159,6 +180,7 @@ update model@Model { .. } (Animate dt)
   | up =
     (model
       { player_pos = check x y 0 (-2) -- change back to y - 2
+      , location = checkLocation x y 0 (-2)
       , fight = fight'
       , direction = "w"
       }, Cmd.none)
@@ -199,20 +221,54 @@ subscriptions = Sub.batch
     _ -> AllStop)
   , Keyboard.presses $ \key -> (case key of
     Keyboard.SpaceKey -> Space
+    Keyboard.EscapeKey -> Pause
     _ -> AllStop)
   , Time.fps 60 Animate
   ]
+
+t :: Eq a => a -> [[Char]]
+t x = tileMap
 
 -- can pass in current direction into player function to print correct direction
 view :: M.Map String (Image SDLEngine) -> Model -> Graphics SDLEngine
 view imgs model@Model { .. } = Graphics2D $
   center (V2 (500 / 2) (500 / 2)) $ collage
-    (  background tileMap imgs x y
-    ++ [ move (V2 0 0) $ player imgs direction fight
-       ]
-    ++ background buildingsMap imgs x y)
+    (  background backgroundMap imgs x y
+    ++ [ move (V2 0 0) $ player imgs direction fight ]
+    ++ background objectMap imgs x y
+    ++ [ move (V2 100 100) $ pausedOverlay paused x y ])
     where
       V2 x y = player_pos
+      menu = pausedOverlay paused x y
+      backgroundMap | location == World = tileMap
+                    | otherwise = houseMap
+      objectMap | location == World = buildingsMap
+                | otherwise = houseObjects
+
+-- idea for view function
+{-|
+
+backgroundMap | location == World = tileMap
+              | otherwise = houseMap
+Instead of having background
+player
+buildings
+paused overlay
+
+could have in the where,
+overallBackground = group $ [
+  background
+  ...
+]
+or as well as that
+have a boolean value representing areas of the map
+backgroundMap | zoneOne = background tileMap img x y ...
+              | houseOne = background house img x y ...
+
+and when entering different zones then change the boolean values
+-}
+
+
 
 
 
